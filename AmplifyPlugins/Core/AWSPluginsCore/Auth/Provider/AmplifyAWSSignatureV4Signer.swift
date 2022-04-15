@@ -16,12 +16,10 @@ public protocol AWSSignatureV4Signer {
                             credentialsProvider: CredentialsProvider,
                             signingName: Swift.String,
                             signingRegion: Swift.String,
-                            date: ClientRuntime.Date) throws -> SdkHttpRequest?
+                            date: ClientRuntime.Date) async throws -> SdkHttpRequest?
 }
 
 public class AmplifyAWSSignatureV4Signer: AWSSignatureV4Signer {
-    let group = DispatchGroup()
-    
     public init() {
     }
     
@@ -29,10 +27,9 @@ public class AmplifyAWSSignatureV4Signer: AWSSignatureV4Signer {
                                    credentialsProvider: CredentialsProvider,
                                    signingName: Swift.String,
                                    signingRegion: Swift.String,
-                                   date: ClientRuntime.Date) throws -> SdkHttpRequest? {
+                                   date: ClientRuntime.Date) async throws -> SdkHttpRequest? {
         do {
-            let credentialsResult = try credentialsProvider.getCredentials()
-            let credentials = try credentialsResult.get()
+            let credentials = try await credentialsProvider.getCredentials()
 
             let flags = SigningFlags(useDoubleURIEncode: true,
                                      shouldNormalizeURIPath: true,
@@ -47,18 +44,8 @@ public class AmplifyAWSSignatureV4Signer: AWSSignatureV4Signer {
                                                  service: signingName,
                                                  region: signingRegion,
                                                  signatureType: .requestHeaders)
-            group.enter()
-            var httpRequest: SdkHttpRequest? = nil
-            let update: (SdkHttpRequest?) -> Void = {
-                httpRequest = $0
-                self.group.leave()
-            }
-            Task {
-                let value = await AWSSigV4Signer.sigV4SignedRequest(requestBuilder: requestBuilder, signingConfig: signingConfig)
-                update(value)
-            }
-            _ = group.wait(timeout: .distantFuture)
-
+            
+            let httpRequest = await AWSSigV4Signer.sigV4SignedRequest(requestBuilder: requestBuilder, signingConfig: signingConfig)
             return httpRequest
         } catch let error {
             throw AuthError.unknown("Unable to sign request", error)
