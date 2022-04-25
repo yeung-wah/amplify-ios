@@ -12,7 +12,7 @@ import AppSyncRealTimeClient
 import AWSClientRuntime
 import ClientRuntime
 
-class IAMAuthInterceptor: AuthInterceptor {
+class IAMAuthInterceptor: AuthInterceptorAsync {
 
     private static let defaultLowercasedHeaderKeys: Set = [SubscriptionConstants.authorizationkey.lowercased(),
                                                            RealtimeProviderConstants.acceptKey.lowercased(),
