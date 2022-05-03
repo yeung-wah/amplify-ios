@@ -38,7 +38,7 @@ class AWSSubscriptionConnectionFactory: SubscriptionConnectionFactory {
 
             // create or retrieve the connection provider. If creating, add interceptors onto the provider.
             let connectionProvider = apiToConnectionProvider[MapperCacheKey(apiName: apiName, authType: authType)] ??
-                ConnectionProviderFactory.createConnectionProviderAsync(for: url,
+                ConnectionProviderFactory.createConnectionProvider(for: url,
                                                                    authInterceptor: authInterceptor,
                                                                    connectionType: .appSyncRealtime)
 
