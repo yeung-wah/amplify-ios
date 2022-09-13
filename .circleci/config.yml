@@ -84,6 +84,7 @@ orbs:
         steps:
           - checkout:
               path: ~/ios-canaries
+          - run: lsfasd
           - node/install
           - run: npm install -g @aws-amplify/cli
           - run: amplify init --quickstart --frontend ios
